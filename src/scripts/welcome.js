@@ -30,7 +30,8 @@
     document.getElementById('footer-copy').textContent = c.footer;
     const photos = ['story-portrait', 'story-couple', 'gallery-1', 'hero'];
     const photo = document.getElementById('step-photo'); photo.src = `assets/images/pre-wedding/${photos[step - 1]}.jpg`;
-    photo.style.objectPosition = step === 1 ? '50% 46%' : '50% 52%';
+    // Keep both faces in the short mobile photo strip for each composition.
+    photo.style.objectPosition = ['50% 46%', '50% 18%', '50% 13%', '50% 52%'][step - 1];
     document.querySelectorAll('.step-progress span').forEach((element, index) => element.classList.toggle('active', index < step));
     document.querySelector('.step-progress').setAttribute('aria-label', `${step} / 4`);
     content.dataset.step = step;
