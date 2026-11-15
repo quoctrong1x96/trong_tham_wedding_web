@@ -15,7 +15,7 @@
     self: '<path d="M7 23l3-10h20l4 10M5 23h30v10H5zM11 13l2-5h14l3 5M8 33v3M32 33v3M20 18c-5-6-9 1 0 6 9-5 5-12 0-6"/><circle cx="11" cy="28" r="1.5"/><circle cx="29" cy="28" r="1.5"/>',
     shuttle: '<rect x="5" y="7" width="30" height="27" rx="6"/><path d="M5 23h30M11 12h18v11M20 12v11M10 34v3M30 34v3M16 4l4 2 4-2"/><circle cx="12" cy="28" r="1.5"/><circle cx="28" cy="28" r="1.5"/>',
   };
-  const icon = key => `<span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 40 40">${icons[key]}</svg></span>`;
+  const icon = key => `<span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 40 40">${icons[key]}<path class="icon-love" d="M31 5c-4-5-8 1 0 6 8-5 4-11 0-6Z"/></svg></span>`;
   const t = () => copy[state.lang];
   const map = address => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   const choice = (key, title, note) => `<button type="button" class="choice" data-choice="${key}">${icon(key)}<span class="choice-text"><strong>${escape(title)}</strong><small>${escape(note)}</small></span><span class="choice-arrow" aria-hidden="true">↗</span></button>`;
@@ -35,9 +35,10 @@
     document.querySelectorAll('.step-progress span').forEach((element, index) => element.classList.toggle('active', index < step));
     document.querySelector('.step-progress').setAttribute('aria-label', `${step} / 4`);
     content.dataset.step = step;
+    content.dataset.guestGroup = step > 2 ? state.group : '';
     content.classList.remove('enter');
     if (step === 1) {
-      content.innerHTML = `<p class="eyebrow">OUR WEDDING · 我們結婚了</p><h1 class="couple-names"><span>${escape(data.groom)}</span><em>&amp;</em><span>${escape(data.bride)}</span></h1><div class="wedding-date">${escape(data.date.split('-').reverse().join('.'))} <span aria-hidden="true">♡</span> VIỆT NAM</div>
+      content.innerHTML = `<p class="eyebrow">OUR WEDDING · 我們結婚了</p><h1 class="couple-names"><span class="groom-name">${escape(data.groom)}</span><em class="heart-beat" aria-hidden="true">♥</em><span class="bride-name">${escape(data.bride)}</span></h1><div class="wedding-date">${escape(data.date.split('-').reverse().join('.'))} <span class="date-heart" aria-hidden="true">♥</span> VIỆT NAM</div>
         <form class="welcome-form" id="name-form"><label class="name-label" for="guest-name">Chúng mình gọi bạn là gì?<small lang="en">What should we call you? <span lang="zh-TW">／ 我們該怎麼稱呼你？</span></small></label><input class="name-input" id="guest-name" name="name" autocomplete="name" maxlength="100" required value="${escape(state.name)}" placeholder="Tên / Name / 姓名" aria-describedby="name-error" /><p id="name-error" class="form-error" role="alert" hidden></p><div class="language-choices"><button type="submit" class="language-button" name="lang" value="vi" lang="vi">Tiếp tục bằng tiếng Việt <span aria-hidden="true">→</span></button><button type="submit" class="language-button" name="lang" value="en" lang="en">Continue in English <span aria-hidden="true">→</span></button><button type="submit" class="language-button" name="lang" value="zh-TW" lang="zh-TW">以繁體中文繼續 <span aria-hidden="true">→</span></button></div><p class="privacy-note">Lựa chọn chỉ gửi cho gia đình. / Answers are private. / 回覆僅供新人查看。</p></form>`;
       document.getElementById('name-form').addEventListener('submit', event => {
         event.preventDefault(); const input = document.getElementById('guest-name');
