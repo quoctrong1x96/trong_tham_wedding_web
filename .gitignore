@@ -1,0 +1,5 @@
+server/storage/
+node_modules/
+*.log
+.env
+wedding-backup*.json
