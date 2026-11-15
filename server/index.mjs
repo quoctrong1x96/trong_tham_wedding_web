@@ -107,7 +107,7 @@ export async function createWeddingServer({ storageDir = path.join(root, 'server
       }
       if (!['GET', 'HEAD'].includes(req.method)) throw fail(405, 'Phương thức không được hỗ trợ.');
       const pathname = decodeURIComponent(url.pathname);
-      if (!(/^\/(index|nha-gai|nha-trai)\.html$/.test(pathname) || pathname === '/' || /^\/assets\/[a-zA-Z0-9/_ .-]+$/.test(pathname))) throw fail(404, 'Không tìm thấy trang.');
+      if (!(/^\/(index|details|nha-gai|nha-trai)\.html$/.test(pathname) || pathname === '/' || /^\/assets\/[a-zA-Z0-9/_ .-]+$/.test(pathname))) throw fail(404, 'Không tìm thấy trang.');
       const file = path.resolve(staticDir, '.' + (pathname === '/' ? '/index.html' : pathname));
       const rel = path.relative(resolvedStatic, file);
       if (rel.startsWith('..') || path.isAbsolute(rel)) throw fail(404, 'Không tìm thấy trang.');

@@ -1,5 +1,9 @@
 # Website thiệp cưới
 
+Luồng mới ưu tiên điện thoại: `index.html` hỏi tên → ngôn ngữ Việt/Anh/Hoa phồn thể → nhóm cô dâu/chú rể → phương tiện → địa điểm đón và nhóm Zalo. Trang `details.html` có thông tin hai ngày cưới, album và lời chúc theo ngôn ngữ đã chọn. Lịch xe ngày 13/12/2026 lấy từ tài liệu gia đình: điểm 01 dành cho nhóm chú rể, điểm 02 dành cho nhóm cô dâu.
+
+**Kết nối database:** xem [hướng dẫn Supabase](docs/SUPABASE-SETUP.md) và chạy [SQL tạo bảng](database/supabase.sql). Khi chưa cấu hình `src/scripts/site-config.js`, website vẫn xem được nhưng chưa gửi câu trả lời/lời chúc cho gia đình. Bản cập nhật không đưa dữ liệu khách vào kho GitHub.
+
 Nhập thông tin thiệp bằng CSV, xuất HTML bằng PowerShell, chạy server Node.js để lưu xác nhận và tương tác vào file.
 
 ## Chạy bản đầy đủ

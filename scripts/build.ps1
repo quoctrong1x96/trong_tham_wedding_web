@@ -59,11 +59,14 @@ $output = @{}
 Get-ChildItem -LiteralPath (Join-Path $root 'src/pages') -Filter '*.html' | ForEach-Object {
     $output[$_.Name] = Expand-Template ([IO.File]::ReadAllText($_.FullName)) $false
 }
-$output['assets/js/app.js'] = Expand-Template ([IO.File]::ReadAllText((Join-Path $root 'src/scripts/app.js'))) $true
-$output['assets/js/invitation.js'] = Expand-Template ([IO.File]::ReadAllText((Join-Path $root 'src/scripts/invitation.js'))) $true
+Get-ChildItem -LiteralPath (Join-Path $root 'src/scripts') -Filter '*.js' | ForEach-Object {
+    $output[('assets/js/' + $_.Name)] = Expand-Template ([IO.File]::ReadAllText($_.FullName)) $true
+}
 $output['assets/js/qrcode.js'] = [IO.File]::ReadAllText((Join-Path $root 'scripts/vendor/qrcode.cjs'))
 $output['assets/js/qrcode.LICENSE.txt'] = [IO.File]::ReadAllText((Join-Path $root 'scripts/vendor/LICENSE-qrcode.txt'))
-$output['assets/css/styles.css'] = [IO.File]::ReadAllText((Join-Path $root 'src/styles/styles.css'))
+Get-ChildItem -LiteralPath (Join-Path $root 'src/styles') -Filter '*.css' | ForEach-Object {
+    $output[('assets/css/' + $_.Name)] = [IO.File]::ReadAllText($_.FullName)
+}
 $dist = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $dist,(Join-Path $dist 'assets/css'),(Join-Path $dist 'assets/js') | Out-Null
 $utf8 = New-Object System.Text.UTF8Encoding($false)
