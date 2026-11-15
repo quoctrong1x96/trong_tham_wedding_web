@@ -1,4 +1,4 @@
-﻿param([string]$CsvPath = 'data/wedding.csv')
+param([string]$CsvPath = 'data/wedding.csv')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 if (-not [IO.Path]::IsPathRooted($CsvPath)) { $CsvPath = Join-Path $root $CsvPath }
@@ -38,11 +38,14 @@ foreach ($range in @(@('bride_start','bride_end'),@('groom_start','groom_recepti
     if ([string]::CompareOrdinal($config[$range[0]], $config[$range[1]]) -ge 0) { throw "Invalid time order: $($range -join ', ')" }
 }
 function Expand-Template([string]$text, [bool]$javascript) {
+    # GetNewClosure captures local variables; Actions invokes this script from
+    # another script scope, so explicitly capture the template configuration.
+    $templateConfig = $config
     return [regex]::Replace($text, '\{\{([a-z_]+)\}\}', {
         param($match)
         $key = $match.Groups[1].Value
-        if (-not $config.ContainsKey($key)) { throw "Unknown template key: $key" }
-        $value = $config[$key]
+        if (-not $templateConfig.ContainsKey($key)) { throw "Unknown template key: $key" }
+        $value = $templateConfig[$key]
         if ($javascript) {
             $json = ConvertTo-Json -InputObject $value -Compress
             return $json.Substring(1, $json.Length - 2)
