@@ -50,7 +50,7 @@
         step = 2; saveDraft(); render();
       });
     } else if (step === 2 || step === 3) {
-      content.innerHTML = `<p class="eyebrow">${step === 2 ? '01' : '02'} / ${escape(c.wedding)}</p><p class="greeting">${escape(c.hello)} ${escape(state.name)} ♡</p><h1 class="step-title">${escape(step === 2 ? c.groupQuestion : c.travelQuestion)}</h1><p class="step-intro">${escape(step === 2 ? c.groupIntro : c.travelIntro)}</p><div class="choice-grid">${step === 2 ? choice('groom', c.groom, c.groomFriends) + choice('bride', c.bride, c.brideFriends) : choice('self', c.self, c.selfNote) + choice('shuttle', c.shuttle, c.shuttleNote) + `<a class="choice online-choice" href="${detailsLink()}#events">${choiceContent('online', c.online, c.onlineNote)}</a>`}</div>`;
+      content.innerHTML = `<p class="eyebrow">${step === 2 ? '01' : '02'} / ${escape(c.wedding)}</p><p class="greeting">${escape(c.hello)} ${escape(state.name)} ♡</p><h1 class="step-title">${escape(step === 2 ? c.groupQuestion : c.travelQuestion)}</h1><p class="step-intro">${escape(step === 2 ? c.groupIntro : c.travelIntro)}</p><div class="choice-grid">${step === 2 ? choice('groom', c.groom, c.groomFriends) + choice('bride', c.bride, c.brideFriends) : choice('self', c.self, c.selfNote) + choice('shuttle', c.shuttle, c.shuttleNote) + `<a class="choice online-choice" href="${detailsLink()}&amp;mode=online">${choiceContent('online', c.online, c.onlineNote)}</a>`}</div>`;
       content.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click', () => {
         if (step === 2) { state.group = button.dataset.choice; state.transport = null; }
         else state.transport = button.dataset.choice;

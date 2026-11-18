@@ -1,7 +1,10 @@
 (() => {
   const store = window.WeddingStore, data = window.WEDDING_DATA, copies = window.WEDDING_COPY;
   const draft = store.readDraft();
-  const requested = new URLSearchParams(location.search).get('lang');
+  const params = new URLSearchParams(location.search);
+  const requested = params.get('lang');
+  const hasGroup = ['groom', 'bride'].includes(draft?.group);
+  const mode = params.get('mode') === 'online' || !hasGroup ? 'online' : draft.transport;
   const languages = ['vi', 'en', 'zh-TW'];
   let lang = languages.includes(requested) ? requested : languages.includes(draft?.lang) ? draft.lang : 'vi';
   let currentPhoto = 0, photoTrigger, wishAttempt = null, sending = false, loadVersion = 0;
@@ -10,9 +13,31 @@
   const map = address => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   const escape = text => String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const date = value => new Intl.DateTimeFormat(c().locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(`${value}T12:00:00+07:00`));
+  const actionIcons = {
+    online: '<rect x="5" y="11" width="38" height="27" rx="4"/><path d="m6 15 18 14 18-14M6 35l12-11m24 11L30 24"/><path d="M24 10c-6-7-12 2 0 9 12-7 6-16 0-9Z" fill="var(--guest-icon-bg)"/>',
+    self: '<path d="M38 20c0 10-14 22-14 22S10 30 10 20a14 14 0 1 1 28 0Z"/><circle cx="24" cy="20" r="5"/>',
+    shuttle: '<path d="M12 35H5V13a4 4 0 0 1 4-4h26a6 6 0 0 1 6 5l2 11v10h-6m-8 0H20M5 16h36M5 26h38M15 16v10m8-10v10m8-10v10"/><circle cx="16" cy="35" r="4"/><circle cx="33" cy="35" r="4"/>',
+  };
+  function renderGuestAction() {
+    const box = document.getElementById('guest-action');
+    const kind = mode === 'self' || mode === 'shuttle' ? mode : 'online';
+    const label = kind === 'online' ? c().openEnvelope : kind === 'self' ? 'Google Maps ↗' : c().returnJourney + ' →';
+    const icon = `<span class="guest-action-icon" aria-hidden="true"><svg viewBox="0 0 48 48">${actionIcons[kind]}</svg></span>`;
+    const content = `<span class="primary guest-action-label">${escape(label)}</span>${icon}`;
+    const point = kind === 'shuttle' ? data.pickup[draft.group] : null;
+    const summary = point ? `<p class="guest-pickup"><strong>${escape(c().pickup)} ${point.number}</strong><br />${escape(point.address)}<br />${data.schedule[0][0]} · ${escape(c().boarding)}</p>` : '';
+    const link = kind === 'self' ? `href="${map(data.venue)}" target="_blank" rel="noopener noreferrer"` : 'href="index.html?step=4"';
+    box.dataset.mode = kind;
+    box.innerHTML = kind === 'online'
+      ? `<button type="button" class="guest-action-control" aria-haspopup="dialog">${content}</button>`
+      : `<a class="guest-action-control" ${link}>${content}</a>${summary}`;
+    if (kind === 'online') box.querySelector('button').addEventListener('click', openGift);
+  }
+
   function render() {
     document.documentElement.lang = lang; document.getElementById('details-language').value = lang;
     document.querySelectorAll('[data-copy]').forEach(element => { element.textContent = c()[element.dataset.copy]; });
+    renderGuestAction();
     document.getElementById('wish-name').placeholder = c().namePlaceholder;
     document.getElementById('wish-message').placeholder = c().messagePlaceholder;
     document.getElementById('close-album').setAttribute('aria-label', c().close);
@@ -32,8 +57,13 @@
   }
   const giftDialog = document.getElementById('gift-dialog');
   const giftButton = document.getElementById('open-gift');
-  giftButton.addEventListener('click', () => giftDialog.showModal());
-  giftDialog.addEventListener('close', () => giftButton.focus());
+  let giftTrigger;
+  function openGift(event) {
+    giftTrigger = event.currentTarget;
+    giftDialog.showModal();
+  }
+  giftButton.addEventListener('click', openGift);
+  giftDialog.addEventListener('close', () => giftTrigger?.focus());
   const dialog = document.getElementById('album-dialog');
   document.getElementById('close-album').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => photoTrigger?.focus());
