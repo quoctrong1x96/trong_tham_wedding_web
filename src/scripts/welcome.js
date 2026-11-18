@@ -12,13 +12,16 @@
   const icons = {
     groom: '<circle cx="20" cy="12" r="6"/><path d="M9 33v-6c0-7 22-7 22 0v6M15 24l5 6 5-6M20 30v5M7 8l2 2 4-4"/>',
     bride: '<circle cx="20" cy="13" r="6"/><path d="M12 12c0-13 16-13 16 0M12 10L5 33h30L28 10M13 25l7 8 7-8M17 5l3-3 3 3"/>',
-    self: '<path d="M7 23l3-10h20l4 10M5 23h30v10H5zM11 13l2-5h14l3 5M8 33v3M32 33v3M20 18c-5-6-9 1 0 6 9-5 5-12 0-6"/><circle cx="11" cy="28" r="1.5"/><circle cx="29" cy="28" r="1.5"/>',
-    shuttle: '<rect x="5" y="7" width="30" height="27" rx="6"/><path d="M5 23h30M11 12h18v11M20 12v11M10 34v3M30 34v3M16 4l4 2 4-2"/><circle cx="12" cy="28" r="1.5"/><circle cx="28" cy="28" r="1.5"/>',
+    self: '<path d="M11 28H5v-7l5-3 5-7h12l5 7 4 2v8h-5m-6 0h-8M10 18h22M21 11v7"/><circle cx="14" cy="28" r="3"/><circle cx="28" cy="28" r="3"/>',
+    shuttle: '<path d="M9 29H4V11a3 3 0 0 1 3-3h23a5 5 0 0 1 5 4l2 9v8h-5m-6 0H15M4 14h32M4 22h33M12 14v8m8-8v8m8-8v8"/><circle cx="12" cy="29" r="3"/><circle cx="29" cy="29" r="3"/>',
+    online: '<rect x="5" y="9" width="30" height="23" rx="4"/><path d="m6 12 14 11 14-11M6 29l9-9m19 9-9-9"/>',
   };
   const icon = key => `<span class="choice-icon" aria-hidden="true"><svg viewBox="0 0 40 40">${icons[key]}<path class="icon-love" d="M31 5c-4-5-8 1 0 6 8-5 4-11 0-6Z"/></svg></span>`;
   const t = () => copy[state.lang];
   const map = address => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-  const choice = (key, title, note) => `<button type="button" class="choice" data-choice="${key}">${icon(key)}<span class="choice-text"><strong>${escape(title)}</strong><small>${escape(note)}</small></span><span class="choice-arrow" aria-hidden="true">↗</span></button>`;
+  const choiceContent = (key, title, note) => `${icon(key)}<span class="choice-text"><strong>${escape(title)}</strong><small>${escape(note)}</small></span><span class="choice-arrow" aria-hidden="true">↗</span>`;
+  const choice = (key, title, note) => `<button type="button" class="choice" data-choice="${key}">${choiceContent(key, title, note)}</button>`;
+  const detailsLink = () => `details.html?lang=${encodeURIComponent(state.lang)}`;
   function saveDraft() { store.writeDraft(state); }
   function render(focus = true) {
     const c = t();
@@ -47,7 +50,7 @@
         step = 2; saveDraft(); render();
       });
     } else if (step === 2 || step === 3) {
-      content.innerHTML = `<p class="eyebrow">${step === 2 ? '01' : '02'} / ${escape(c.wedding)}</p><p class="greeting">${escape(c.hello)} ${escape(state.name)} ♡</p><h1 class="step-title">${escape(step === 2 ? c.groupQuestion : c.travelQuestion)}</h1><p class="step-intro">${escape(step === 2 ? c.groupIntro : c.travelIntro)}</p><div class="choice-grid">${step === 2 ? choice('groom', c.groom, c.groomFriends) + choice('bride', c.bride, c.brideFriends) : choice('self', c.self, c.selfNote) + choice('shuttle', c.shuttle, c.shuttleNote)}</div>`;
+      content.innerHTML = `<p class="eyebrow">${step === 2 ? '01' : '02'} / ${escape(c.wedding)}</p><p class="greeting">${escape(c.hello)} ${escape(state.name)} ♡</p><h1 class="step-title">${escape(step === 2 ? c.groupQuestion : c.travelQuestion)}</h1><p class="step-intro">${escape(step === 2 ? c.groupIntro : c.travelIntro)}</p><div class="choice-grid">${step === 2 ? choice('groom', c.groom, c.groomFriends) + choice('bride', c.bride, c.brideFriends) : choice('self', c.self, c.selfNote) + choice('shuttle', c.shuttle, c.shuttleNote) + `<a class="choice online-choice" href="${detailsLink()}#events">${choiceContent('online', c.online, c.onlineNote)}</a>`}</div>`;
       content.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click', () => {
         if (step === 2) { state.group = button.dataset.choice; state.transport = null; }
         else state.transport = button.dataset.choice;
@@ -56,7 +59,7 @@
       }));
     } else {
       const point = data.pickup[state.group], shuttle = state.transport === 'shuttle';
-      content.innerHTML = `<p class="eyebrow">${escape(c.journey)}</p><h1 class="step-title final-title">${escape(shuttle ? c.shuttleTitle : c.selfTitle)}</h1><p class="greeting">${escape(state.name)} · ${escape(c.dateLabel)} · ${escape(data.date.split('-').reverse().join('.'))}</p><div class="travel-summary"><p class="eyebrow">${escape(shuttle ? `${c.pickup} ${point.number} · ${c[state.group]}` : c.weddingVenue)}</p><p class="pickup-address">${escape(shuttle ? point.address : data.venue)}</p><a class="pickup-map" href="${map(shuttle ? point.address : data.venue)}" target="_blank" rel="noopener noreferrer">${escape(c.map)} ↗</a>${shuttle ? `<ol class="schedule">${data.schedule.map(([time, key]) => `<li><time>${time}</time><span>${escape(c[key])}</span></li>`).join('')}</ol><p class="schedule-note">${escape(c.scheduleNote)}</p>` : `<p class="schedule-note">${escape(c.selfArrival)}</p><p class="schedule-note">${escape(c.timeZone)}</p>`}</div><div class="final-actions"><a class="primary" id="group-link" href="${escape(point.zalo)}" target="_blank" rel="noopener noreferrer">${escape(c.join)} ↗</a><a class="outline-link" href="details.html?lang=${encodeURIComponent(state.lang)}">${escape(c.discover)} <span aria-hidden="true">→</span></a></div><p class="privacy-note">${escape(c.zaloNote)}</p><div class="save-row"><p id="save-note" class="save-line" role="status" aria-live="polite"></p><button type="button" id="retry" class="retry-button">${escape(c.retry)}</button></div>`;
+      content.innerHTML = `<p class="eyebrow">${escape(c.journey)}</p><h1 class="step-title final-title">${escape(shuttle ? c.shuttleTitle : c.selfTitle)}</h1><p class="greeting">${escape(state.name)} · ${escape(c.dateLabel)} · ${escape(data.date.split('-').reverse().join('.'))}</p><div class="travel-summary"><p class="eyebrow">${escape(shuttle ? `${c.pickup} ${point.number} · ${c[state.group]}` : c.weddingVenue)}</p><p class="pickup-address">${escape(shuttle ? point.address : data.venue)}</p><a class="pickup-map" href="${map(shuttle ? point.address : data.venue)}" target="_blank" rel="noopener noreferrer">${escape(c.map)} ↗</a>${shuttle ? `<ol class="schedule">${data.schedule.map(([time, key]) => `<li><time>${time}</time><span>${escape(c[key])}</span></li>`).join('')}</ol><p class="schedule-note">${escape(c.scheduleNote)}</p>` : `<p class="schedule-note">${escape(c.selfArrival)}</p><p class="schedule-note">${escape(c.timeZone)}</p>`}</div><div class="final-actions"><a class="primary" id="group-link" href="${escape(point.zalo)}" target="_blank" rel="noopener noreferrer">${escape(c.join)} ↗</a><a class="outline-link" href="${detailsLink()}">${escape(c.discover)} <span aria-hidden="true">→</span></a></div><p class="privacy-note">${escape(c.zaloNote)}</p><div class="save-row"><p id="save-note" class="save-line" role="status" aria-live="polite"></p><button type="button" id="retry" class="retry-button">${escape(c.retry)}</button></div>`;
       document.getElementById('retry').addEventListener('click', sendResponse); updateSaveStatus();
     }
     content.classList.add('enter');

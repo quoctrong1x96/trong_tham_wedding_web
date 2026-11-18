@@ -16,6 +16,8 @@
     document.getElementById('wish-name').placeholder = c().namePlaceholder;
     document.getElementById('wish-message').placeholder = c().messagePlaceholder;
     document.getElementById('close-album').setAttribute('aria-label', c().close);
+    document.getElementById('close-gift').setAttribute('aria-label', c().closeGift);
+    document.getElementById('gift-qr').alt = c().giftQr;
     document.getElementById('previous-photo').setAttribute('aria-label', c().previous);
     document.getElementById('next-photo').setAttribute('aria-label', c().next);
     document.getElementById('event-list').innerHTML = `<article class="event-detail"><h3>${escape(c().brideParty)}</h3><p class="event-date">${escape(data.brideDate.split('-').reverse().join('.'))}</p><p>${escape(date(data.brideDate))}<br />${escape(data.brideTime)} · ${escape(c().banquet)}</p><p>${escape(data.brideVenue)}</p><a href="${map(data.brideVenue)}" target="_blank" rel="noopener noreferrer">${escape(c().map)} ↗</a></article><article class="event-detail"><h3>${escape(c().groomParty)}</h3><p class="event-date">${escape(data.date.split('-').reverse().join('.'))}</p><p>${escape(date(data.date))}<br />${escape(data.ceremonyTime)} · ${escape(c().ceremony)}<br />${escape(data.receptionTime)} · ${escape(c().banquet)}</p><p>${escape(data.venue)}</p><a href="${map(data.venue)}" target="_blank" rel="noopener noreferrer">${escape(c().map)} ↗</a></article>`;
@@ -28,6 +30,10 @@
     const image = document.getElementById('album-image'); image.src = `assets/images/pre-wedding/${photos[currentPhoto]}.jpg`; image.alt = `${c().photo} ${currentPhoto + 1} · ${data.groom} & ${data.bride}`;
     document.getElementById('photo-index').textContent = `${currentPhoto + 1} / ${photos.length}`;
   }
+  const giftDialog = document.getElementById('gift-dialog');
+  const giftButton = document.getElementById('open-gift');
+  giftButton.addEventListener('click', () => giftDialog.showModal());
+  giftDialog.addEventListener('close', () => giftButton.focus());
   const dialog = document.getElementById('album-dialog');
   document.getElementById('close-album').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => photoTrigger?.focus());

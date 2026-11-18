@@ -67,6 +67,10 @@ export async function verifyWelcome() {
     assert.ok(h.el('step-content').innerHTML.includes('&lt;script&gt;'), 'Guest text is escaped');
     assert.ok(h.el('step-content').innerHTML.includes(h.context.WEDDING_COPY[lang].groupQuestion));
     h.clickChoice(group); assert.equal(h.el('step-content').dataset.step, 3);
+    const travelChoices = h.el('step-content').innerHTML;
+    assert.ok(travelChoices.includes(`href="details.html?lang=${lang}#events"`));
+    assert.ok(travelChoices.includes(h.context.WEDDING_COPY[lang].online));
+    assert.equal(h.calls.length, 0);
     h.clickChoice(transport); await tick();
     assert.equal(h.el('step-content').dataset.step, 4);
     assert.equal(h.calls.length, 1);
