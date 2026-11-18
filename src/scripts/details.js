@@ -4,7 +4,7 @@
   const params = new URLSearchParams(location.search);
   const requested = params.get('lang');
   const hasGroup = ['groom', 'bride'].includes(draft?.group);
-  const mode = params.get('mode') === 'online' || !hasGroup ? 'online' : draft.transport;
+  const mode = hasGroup ? draft.transport : null;
   const languages = ['vi', 'en', 'zh-TW'];
   let lang = languages.includes(requested) ? requested : languages.includes(draft?.lang) ? draft.lang : 'vi';
   let currentPhoto = 0, photoTrigger, wishAttempt = null, sending = false, loadVersion = 0;
@@ -14,14 +14,15 @@
   const escape = text => String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const date = value => new Intl.DateTimeFormat(c().locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(`${value}T12:00:00+07:00`));
   const actionIcons = {
-    online: '<rect x="5" y="11" width="38" height="27" rx="4"/><path d="m6 15 18 14 18-14M6 35l12-11m24 11L30 24"/><path d="M24 10c-6-7-12 2 0 9 12-7 6-16 0-9Z" fill="var(--guest-icon-bg)"/>',
+    online: '<rect x="4" y="18" width="40" height="25" rx="3" fill="#fbd9e5"/><path d="m5 41 14-12m24 12L29 29"/><path class="envelope-flap" d="M4 18h40L26 32q-2 2-4 0Z"/><path d="M24 27c-4-4-8 2 0 6 8-4 4-10 0-6Z" fill="#fff5f8"/>',
     self: '<path d="M38 20c0 10-14 22-14 22S10 30 10 20a14 14 0 1 1 28 0Z"/><circle cx="24" cy="20" r="5"/>',
     shuttle: '<path d="M12 35H5V13a4 4 0 0 1 4-4h26a6 6 0 0 1 6 5l2 11v10h-6m-8 0H20M5 16h36M5 26h38M15 16v10m8-10v10m8-10v10"/><circle cx="16" cy="35" r="4"/><circle cx="33" cy="35" r="4"/>',
   };
   function renderGuestAction() {
     const box = document.getElementById('guest-action');
-    const kind = mode === 'self' || mode === 'shuttle' ? mode : 'online';
-    const label = kind === 'online' ? c().openEnvelope : kind === 'self' ? 'Google Maps ↗' : c().returnJourney + ' →';
+    if (!Object.hasOwn(actionIcons, mode)) return;
+    const kind = mode;
+    const label = kind === 'online' ? c().gift : kind === 'self' ? 'Google Maps ↗' : c().returnJourney + ' →';
     const icon = `<span class="guest-action-icon" aria-hidden="true"><svg viewBox="0 0 48 48">${actionIcons[kind]}</svg></span>`;
     const content = `<span class="primary guest-action-label">${escape(label)}</span>${icon}`;
     const point = kind === 'shuttle' ? data.pickup[draft.group] : null;
@@ -29,7 +30,7 @@
     const link = kind === 'self' ? `href="${map(data.venue)}" target="_blank" rel="noopener noreferrer"` : 'href="index.html?step=4"';
     box.dataset.mode = kind;
     box.innerHTML = kind === 'online'
-      ? `<button type="button" class="guest-action-control" aria-haspopup="dialog">${content}</button>`
+      ? `<button type="button" class="guest-action-control guest-envelope" aria-haspopup="dialog">${content}</button>`
       : `<a class="guest-action-control" ${link}>${content}</a>${summary}`;
     if (kind === 'online') box.querySelector('button').addEventListener('click', openGift);
   }
@@ -56,14 +57,23 @@
     document.getElementById('photo-index').textContent = `${currentPhoto + 1} / ${photos.length}`;
   }
   const giftDialog = document.getElementById('gift-dialog');
-  const giftButton = document.getElementById('open-gift');
   let giftTrigger;
   function openGift(event) {
-    giftTrigger = event.currentTarget;
-    giftDialog.showModal();
+    const button = event.currentTarget;
+    if (button.classList.contains('is-opening') || giftDialog.open) return;
+    giftTrigger = button;
+    button.classList.add('is-opening');
+
+    const showGift = () => {
+      if (button.isConnected) giftDialog.showModal();
+    };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGift();
+    else window.setTimeout(showGift, 280);
   }
-  giftButton.addEventListener('click', openGift);
-  giftDialog.addEventListener('close', () => giftTrigger?.focus());
+  giftDialog.addEventListener('close', () => {
+    giftTrigger?.classList.remove('is-opening');
+    giftTrigger?.focus();
+  });
   const dialog = document.getElementById('album-dialog');
   document.getElementById('close-album').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => photoTrigger?.focus());

@@ -6,7 +6,6 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}.details-header{position:sti
 .details-hero p:not(.eyebrow), .detail-note, .event-detail p:not(.event-date),
 #wish-form label, .wish-entry p { font-size: 15px; }
 .details-page .outline-link, .details-page .primary, .wish-entry strong { font-size: 16px; }
-.gift-button { display: inline-flex; background: #fff6fa; border-color: #e4adc0; color: #863954; }
 #gift-dialog {
   width: min(390px, calc(100% - 32px));
   max-height: calc(100svh - 32px);
@@ -81,4 +80,23 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}.details-header{position:sti
 .details-hero .guest-pickup { margin: 10px 0 0; line-height: 1.55; }
 @media (max-width: 760px) {
   .guest-action { align-self: center; }
+}
+
+.guest-envelope .guest-action-icon {
+  width: 132px;
+  height: 112px;
+  border-radius: 20px;
+}
+.guest-envelope .guest-action-icon svg { width: 94px; height: 94px; }
+.envelope-flap {
+  fill: #f2a9c3;
+  transform-origin: 24px 18px;
+  transition: transform 280ms ease, fill 280ms ease;
+}
+.guest-envelope.is-opening .envelope-flap {
+  transform: scaleY(-1);
+  fill: #f8c6d8;
+}
+@media (prefers-reduced-motion: reduce) {
+  .envelope-flap { transition: none; }
 }

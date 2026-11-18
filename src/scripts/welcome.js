@@ -7,7 +7,7 @@
   let step = 1, saving = false;
   if (validDraft) step = ['groom', 'bride'].includes(state.group) ? (['self', 'shuttle'].includes(state.transport) ? 4 : 3) : 2;
   const requested = new URLSearchParams(location.search).get('step');
-  if (requested === '4' && state.group && state.transport) step = 4;
+  if (requested === '4' && ['groom', 'bride'].includes(state.group) && ['self', 'shuttle'].includes(state.transport)) step = 4;
   const escape = text => String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const icons = {
     groom: '<circle cx="20" cy="12" r="6"/><path d="M9 33v-6c0-7 22-7 22 0v6M15 24l5 6 5-6M20 30v5M7 8l2 2 4-4"/>',
@@ -50,7 +50,15 @@
         step = 2; saveDraft(); render();
       });
     } else if (step === 2 || step === 3) {
-      content.innerHTML = `<p class="eyebrow">${step === 2 ? '01' : '02'} / ${escape(c.wedding)}</p><p class="greeting">${escape(c.hello)} ${escape(state.name)} ♡</p><h1 class="step-title">${escape(step === 2 ? c.groupQuestion : c.travelQuestion)}</h1><p class="step-intro">${escape(step === 2 ? c.groupIntro : c.travelIntro)}</p><div class="choice-grid">${step === 2 ? choice('groom', c.groom, c.groomFriends) + choice('bride', c.bride, c.brideFriends) : choice('self', c.self, c.selfNote) + choice('shuttle', c.shuttle, c.shuttleNote) + `<a class="choice online-choice" href="${detailsLink()}&amp;mode=online">${choiceContent('online', c.online, c.onlineNote)}</a>`}</div>`;
+      content.innerHTML = `<p class="eyebrow">${step === 2 ? '01' : '02'} / ${escape(c.wedding)}</p><p class="greeting">${escape(c.hello)} ${escape(state.name)} ♡</p><h1 class="step-title">${escape(step === 2 ? c.groupQuestion : c.travelQuestion)}</h1><p class="step-intro">${escape(step === 2 ? c.groupIntro : c.travelIntro)}</p><div class="choice-grid">${step === 2 ? choice('groom', c.groom, c.groomFriends) + choice('bride', c.bride, c.brideFriends) : choice('self', c.self, c.selfNote) + choice('shuttle', c.shuttle, c.shuttleNote) + `<a id="online-choice" class="choice online-choice" href="${detailsLink()}">${choiceContent('online', c.online, c.onlineNote)}</a>`}</div>`;
+      if (step === 3) {
+        document.getElementById('online-choice').addEventListener('click', () => {
+          state.transport = 'online';
+          state.saved = false;
+          state.responseId = null;
+          saveDraft();
+        });
+      }
       content.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click', () => {
         if (step === 2) { state.group = button.dataset.choice; state.transport = null; }
         else state.transport = button.dataset.choice;

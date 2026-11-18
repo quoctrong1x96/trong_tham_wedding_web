@@ -68,7 +68,7 @@ export async function verifyWelcome() {
     assert.ok(h.el('step-content').innerHTML.includes(h.context.WEDDING_COPY[lang].groupQuestion));
     h.clickChoice(group); assert.equal(h.el('step-content').dataset.step, 3);
     const travelChoices = h.el('step-content').innerHTML;
-    assert.ok(travelChoices.includes(`href="details.html?lang=${lang}&amp;mode=online"`));
+    assert.ok(travelChoices.includes(`href="details.html?lang=${lang}"`));
     assert.ok(travelChoices.includes(h.context.WEDDING_COPY[lang].online));
     assert.equal(h.calls.length, 0);
     h.clickChoice(transport); await tick();
@@ -89,6 +89,12 @@ export async function verifyWelcome() {
     assert.ok(!h.calls[0].options.headers.Authorization, 'Publishable key is not sent as a user JWT');
     branches++;
   }
+  const online = harness();
+  online.start('en');
+  online.clickChoice('bride');
+  online.el('online-choice').handlers.click();
+  assert.equal(JSON.parse(online.storage.get('wedding-welcome')).transport, 'online');
+  assert.equal(online.calls.length, 0, 'Online wishes do not submit a travel RSVP');
   const offline = harness({ fail: true }); offline.start('en'); offline.clickChoice('bride'); offline.clickChoice('shuttle'); await tick();
   assert.equal(offline.el('save-note').dataset.state, 'error');
   const failedId = offline.calls[0].body.id;
