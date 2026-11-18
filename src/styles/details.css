@@ -82,21 +82,36 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}.details-header{position:sti
   .guest-action { align-self: center; }
 }
 
-.guest-envelope .guest-action-icon {
+.guest-gift .guest-action-icon {
   width: 132px;
   height: 112px;
   border-radius: 20px;
 }
-.guest-envelope .guest-action-icon svg { width: 94px; height: 94px; }
-.envelope-flap {
-  fill: #f2a9c3;
-  transform-origin: 24px 18px;
-  transition: transform 280ms ease, fill 280ms ease;
+.guest-gift .guest-action-icon svg { width: 94px; height: 94px; }
+.gift-box-lid {
+  transform-origin: 24px 23px;
+  transition: transform 250ms ease-out;
 }
-.guest-envelope.is-opening .envelope-flap {
-  transform: scaleY(-1);
-  fill: #f8c6d8;
+.guest-gift.is-opening .gift-box-lid {
+  transform: translate(4px, -10px) rotate(17deg);
+}
+.gift-confetti {
+  position: fixed;
+  z-index: 20;
+  pointer-events: none;
+}
+.gift-confetti span {
+  position: absolute;
+  width: 6px;
+  height: 10px;
+  border-radius: 1px;
+  animation: gift-confetti-fall 600ms both;
+}
+@keyframes gift-confetti-fall {
+  0% { transform: translate(0, 0); opacity: 1; }
+  48% { transform: translate(calc(var(--x) * .65), var(--y)) rotate(calc(var(--spin) * .5)); }
+  100% { transform: translate(var(--x), calc(var(--y) + 125px)) rotate(var(--spin)); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .envelope-flap { transition: none; }
+  .gift-box-lid { transition: none; }
 }

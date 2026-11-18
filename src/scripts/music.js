@@ -1,38 +1,83 @@
 (() => {
-  // Keep the YouTube player visible during playback; no hidden audio extraction.
   const translations = {
-    vi: { music: 'Nhạc cưới', close: 'Đóng nhạc', title: 'Một giai điệu cho ngày chung đôi ♡', open: 'Mở trên YouTube ↗' },
-    en: { music: 'Wedding music', close: 'Close music', title: 'A melody for our wedding day ♡', open: 'Open on YouTube ↗' },
-    'zh-TW': { music: '婚禮音樂', close: '關閉音樂', title: '為幸福的日子，獻上一首歌 ♡', open: '在 YouTube 開啟 ↗' },
+    vi: ['Bật nhạc', 'Tắt nhạc'],
+    en: ['Play music', 'Pause music'],
+    'zh-TW': ['播放音樂', '暫停音樂'],
   };
-  const widget = document.createElement('aside'); widget.className = 'music-widget';
-  widget.innerHTML = '<button type="button" class="music-toggle" aria-expanded="false" aria-controls="music-panel"><span aria-hidden="true">♫</span><span class="music-label"></span></button><div id="music-panel" class="music-panel" hidden><div class="music-panel-head"><span class="music-title"></span><button type="button" class="music-close">×</button></div><div class="music-player"></div><a href="https://www.youtube.com/watch?v=kybwR66y0f4" target="_blank" rel="noopener noreferrer"></a></div>';
+  const music = new Audio('assets/music/Beo_dat_may_troi.mp3');
+  music.loop = true;
+  music.volume = 0.35;
+  music.preload = 'none';
+
+  const preferenceKey = 'wedding-music-paused';
+  let pausedByGuest = false;
+  try { pausedByGuest = sessionStorage.getItem(preferenceKey) === 'true'; } catch {}
+
+  const widget = document.createElement('aside');
+  widget.className = 'music-widget';
+  widget.innerHTML = '<button type="button" class="music-toggle"><span aria-hidden="true">♫</span><span class="music-label"></span></button>';
   document.body.append(widget);
-  const toggle = widget.querySelector('.music-toggle'), panel = widget.querySelector('.music-panel'), player = widget.querySelector('.music-player');
-  let open = false;
-  function translate() {
-    const c = translations[document.documentElement.lang] || translations.vi;
-    widget.querySelector('.music-label').textContent = open ? c.close : c.music;
-    widget.querySelector('.music-title').textContent = c.title;
-    widget.querySelector('.music-close').setAttribute('aria-label', c.close);
-    widget.querySelector('a').textContent = c.open;
-    player.querySelector('iframe')?.setAttribute('title', c.music);
+  const toggle = widget.querySelector('button');
+  const label = widget.querySelector('.music-label');
+
+  function updateToggle() {
+    const labels = translations[document.documentElement.lang] || translations.vi;
+    label.textContent = labels[music.paused ? 0 : 1];
   }
-  function setOpen(value) {
-    open = value; panel.hidden = !open; toggle.setAttribute('aria-expanded', String(open));
-    if (open) {
-      const iframe = document.createElement('iframe');
-      // Browsers may still require tapping Play inside the visible player.
-      iframe.src = 'https://www.youtube-nocookie.com/embed/kybwR66y0f4?autoplay=1&playsinline=1&loop=1&playlist=kybwR66y0f4&rel=0';
-      iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
-      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-      iframe.allowFullscreen = true; player.replaceChildren(iframe);
-    } else player.replaceChildren();
-    translate();
+
+  function playMusic() {
+    music.play().catch(updateToggle);
   }
-  toggle.addEventListener('click', () => setOpen(!open));
-  widget.querySelector('.music-close').addEventListener('click', () => { setOpen(false); toggle.focus(); });
-  widget.addEventListener('keydown', event => { if (event.key === 'Escape' && open) { setOpen(false); toggle.focus(); } });
-  new MutationObserver(translate).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-  translate();
+
+  toggle.addEventListener('click', () => {
+    pausedByGuest = !music.paused;
+    try { sessionStorage.setItem(preferenceKey, String(pausedByGuest)); } catch {}
+    if (pausedByGuest) music.pause();
+    else playMusic();
+  });
+  music.addEventListener('play', updateToggle);
+  music.addEventListener('pause', updateToggle);
+  new MutationObserver(updateToggle).observe(document.documentElement, { attributeFilter: ['lang'] });
+  updateToggle();
+  if (!pausedByGuest) playMusic();
+
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let audioContext;
+  function playClick() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    try {
+      audioContext ||= new AudioContext();
+      if (audioContext.state !== 'running') audioContext.resume().catch(() => {});
+      const start = audioContext.currentTime;
+      const tone = audioContext.createOscillator();
+      const volume = audioContext.createGain();
+      tone.frequency.setValueAtTime(720, start);
+      tone.frequency.exponentialRampToValueAtTime(440, start + 0.085);
+      volume.gain.setValueAtTime(0.045, start);
+      volume.gain.exponentialRampToValueAtTime(0.001, start + 0.11);
+      tone.connect(volume).connect(audioContext.destination);
+      tone.start(start);
+      tone.stop(start + 0.11);
+    } catch {
+      // Audio availability must not affect the button action.
+    }
+  }
+
+  function retryMusic(event) {
+    if (!pausedByGuest && music.paused && !toggle.contains(event.target)) playMusic();
+  }
+  document.addEventListener('keydown', retryMusic, true);
+  document.addEventListener('click', event => {
+    retryMusic(event);
+    const control = event.target.closest('button, a[href], [role="button"], input[type="button"], input[type="submit"]');
+    if (!control || control.matches(':disabled, [aria-disabled="true"]')) return;
+    playClick();
+    if (!reducedMotion.matches) {
+      control.animate?.(
+        [{ scale: '1' }, { scale: '0.95', offset: 0.4 }, { scale: '1' }],
+        { duration: 210, easing: 'ease-out' },
+      );
+    }
+  }, true);
 })();

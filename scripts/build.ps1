@@ -1,4 +1,4 @@
-param([string]$CsvPath = 'data/wedding.csv')
+﻿param([string]$CsvPath = 'data/wedding.csv')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 if (-not [IO.Path]::IsPathRooted($CsvPath)) { $CsvPath = Join-Path $root $CsvPath }
@@ -72,4 +72,7 @@ New-Item -ItemType Directory -Force $dist,(Join-Path $dist 'assets/css'),(Join-P
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 foreach ($path in $output.Keys) { [IO.File]::WriteAllText((Join-Path $dist $path), $output[$path], $utf8) }
 Copy-Item -LiteralPath (Join-Path $root 'public/assets/images') -Destination (Join-Path $dist 'assets') -Recurse -Force
+$musicDir = Join-Path $dist 'assets/music'
+New-Item -ItemType Directory -Force $musicDir | Out-Null
+Copy-Item -LiteralPath (Join-Path $root 'Asset/music/Beo_dat_may_troi.mp3') -Destination $musicDir -Force
 Write-Host 'Built dist/: index.html, nha-gai.html, nha-trai.html and assets.'

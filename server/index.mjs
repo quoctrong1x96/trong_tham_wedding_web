@@ -111,7 +111,7 @@ export async function createWeddingServer({ storageDir = path.join(root, 'server
       const file = path.resolve(staticDir, '.' + (pathname === '/' ? '/index.html' : pathname));
       const rel = path.relative(resolvedStatic, file);
       if (rel.startsWith('..') || path.isAbsolute(rel)) throw fail(404, 'Không tìm thấy trang.');
-      const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.txt': 'text/plain; charset=utf-8' }[path.extname(file)];
+      const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.txt': 'text/plain; charset=utf-8' }[path.extname(file)];
       if (!mime) throw fail(404, 'Không tìm thấy tệp.');
       const content = await readFile(file);
       res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-cache' });

@@ -1,0 +1,28 @@
+.music-widget {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 15;
+}
+.music-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #e8b5c6;
+  border-radius: 30px;
+  background: #fff5f9;
+  color: #863954;
+  box-shadow: 0 4px 20px #65223e18;
+  font-size: 12px;
+  cursor: pointer;
+}
+.music-toggle > span:first-child { font-size: 18px; }
+.welcome-page .music-widget { top: 10px; bottom: auto; }
+@media (min-width: 761px) {
+  .welcome-page .music-widget { right: calc(50% + 18px); }
+}
+@media (max-width: 760px) {
+  [data-invitation] .music-widget { bottom: calc(74px + env(safe-area-inset-bottom)); }
+}

@@ -14,7 +14,7 @@
   const escape = text => String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const date = value => new Intl.DateTimeFormat(c().locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(`${value}T12:00:00+07:00`));
   const actionIcons = {
-    online: '<rect x="4" y="18" width="40" height="25" rx="3" fill="#fbd9e5"/><path d="m5 41 14-12m24 12L29 29"/><path class="envelope-flap" d="M4 18h40L26 32q-2 2-4 0Z"/><path d="M24 27c-4-4-8 2 0 6 8-4 4-10 0-6Z" fill="#fff5f8"/>',
+    online: '<rect x="8" y="26" width="32" height="17" rx="2" fill="#fbd9e5"/><path d="M21 26h6v17h-6z" fill="#e991b1"/><g class="gift-box-lid"><path d="M24 19C4 18 15 4 24 19C33 4 44 18 24 19Z" fill="#f5b6cd"/><rect x="5" y="19" width="38" height="8" rx="2" fill="#f5b6cd"/><path d="M21 19h6v8h-6z" fill="#e991b1"/></g>',
     self: '<path d="M38 20c0 10-14 22-14 22S10 30 10 20a14 14 0 1 1 28 0Z"/><circle cx="24" cy="20" r="5"/>',
     shuttle: '<path d="M12 35H5V13a4 4 0 0 1 4-4h26a6 6 0 0 1 6 5l2 11v10h-6m-8 0H20M5 16h36M5 26h38M15 16v10m8-10v10m8-10v10"/><circle cx="16" cy="35" r="4"/><circle cx="33" cy="35" r="4"/>',
   };
@@ -30,7 +30,7 @@
     const link = kind === 'self' ? `href="${map(data.venue)}" target="_blank" rel="noopener noreferrer"` : 'href="index.html?step=4"';
     box.dataset.mode = kind;
     box.innerHTML = kind === 'online'
-      ? `<button type="button" class="guest-action-control guest-envelope" aria-haspopup="dialog">${content}</button>`
+      ? `<button type="button" class="guest-action-control guest-gift" aria-haspopup="dialog">${content}</button>`
       : `<a class="guest-action-control" ${link}>${content}</a>${summary}`;
     if (kind === 'online') box.querySelector('button').addEventListener('click', openGift);
   }
@@ -58,6 +58,25 @@
   }
   const giftDialog = document.getElementById('gift-dialog');
   let giftTrigger;
+  function burstConfetti(button) {
+    const { left, top, width, height } = button.querySelector('.guest-action-icon').getBoundingClientRect();
+    const burst = document.createElement('div');
+    burst.className = 'gift-confetti';
+    burst.setAttribute('aria-hidden', 'true');
+    burst.style.left = `${left + width / 2}px`;
+    burst.style.top = `${top + height / 2}px`;
+    const colors = ['#e36b9a', '#f8bc50', '#f8acc8', '#786bcb', '#53ac9b'];
+    for (let i = 0; i < 32; i++) {
+      const piece = document.createElement('span');
+      piece.style.backgroundColor = colors[i % colors.length];
+      piece.style.setProperty('--x', `${Math.random() * 280 - 140}px`);
+      piece.style.setProperty('--y', `${-55 - Math.random() * 115}px`);
+      piece.style.setProperty('--spin', `${Math.random() * 1080 - 540}deg`);
+      burst.append(piece);
+    }
+    document.body.append(burst);
+    window.setTimeout(() => burst.remove(), 620);
+  }
   function openGift(event) {
     const button = event.currentTarget;
     if (button.classList.contains('is-opening') || giftDialog.open) return;
@@ -68,7 +87,10 @@
       if (button.isConnected) giftDialog.showModal();
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGift();
-    else window.setTimeout(showGift, 280);
+    else {
+      burstConfetti(button);
+      window.setTimeout(showGift, 620);
+    }
   }
   giftDialog.addEventListener('close', () => {
     giftTrigger?.classList.remove('is-opening');
